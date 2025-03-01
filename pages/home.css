@@ -1,0 +1,11 @@
+.homeContainer {
+  width: 100%;
+  min-height: 100vh;
+  padding: 20px;
+}
+.homeContainer header {
+  margin-bottom: 20px;
+}
+.homeContainer main {
+  flex: 1;
+}
