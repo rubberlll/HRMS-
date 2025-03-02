@@ -8,6 +8,7 @@ const Blog = lazy(() => import("../pages/Blog"));
 const Welcome = lazy(() => import("../pages/Welcome"));
 const User = lazy(() => import("../pages/User"));
 const NotFound = lazy(() => import("../pages/NotFound"));
+const Test = lazy(() => import("../pages/test/Test"));
 
 const router = createBrowserRouter([
   {
@@ -36,6 +37,11 @@ const router = createBrowserRouter([
   {
     path: "/notfound",
     Component: NotFound,
+  },
+
+  {
+    path: "/test",
+    Component: Test,
   },
 ]);
 

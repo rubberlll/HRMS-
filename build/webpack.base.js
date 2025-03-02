@@ -15,41 +15,29 @@ module.exports = {
           },
         },
       },
+
       {
-        test: /\.module\.less$/, // 匹配 .module.less 文件
-        use: [
-          "style-loader",
-          {
-            loader: "css-loader",
-            options: {
-              modules: true, // 启用 CSS Modules
-            },
-          },
-          "less-loader", // 先处理 Less 语法
-        ],
-      },
-      {
-        test: /\.(css|less)$/,
-        exclude: /\.module\.less$/, // 排除 .module.less 文件
+        test: /.(css|less)$/, //匹配 css和less 文件
         use: ["style-loader", "css-loader", "less-loader"],
       },
       {
-        test: /\.(png|jpg|jpeg|gif|svg)$/i,
-        type: "asset/resource", // 使用asset模块处理图片
-      },
-      {
-        test: /\.(woff|woff2|eot|ttf|otf)$/i,
-        type: "asset/resource", // 处理字体文件
+        test: /\.(png|jpg|gif|svg)$/,
+        type: "asset/resource",
+        generator: {
+          filename: "images/[hash][ext]", // 输出路径和文件名
+        },
       },
     ],
   },
   resolve: {
-    ///可以import aaa   不是import aa.ts
     extensions: [".tsx", ".ts", ".js", ".jsx", ".json"],
+    alias: {
+      "@": path.resolve(__dirname, "../src"),
+    },
   },
   output: {
     filename: "bundle.js",
-    path: path.resolve(__dirname, "./dist"),
+    path: path.resolve(__dirname, "../dist"),
   },
 
   plugins: [

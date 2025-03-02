@@ -1,0 +1,2 @@
+"use strict";(self.webpackChunkmy_pra=self.webpackChunkmy_pra||[]).push([[856],{8856:(e,l,a)=>{a.r(l),a.d(l,{default:()=>r});var t=a(6540),n=a(4984);const r=()=>t.createElement("div",null,"这里是首页",t.createElement(n.sv,null))}}]);
+//# sourceMappingURL=856.bundle.js.map

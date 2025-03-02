@@ -1,0 +1,1 @@
+{"version":3,"file":"328.bundle.js","mappings":"2IAEA,MAIA,EAJuBA,IACdC,EAAAA,cAAA,WAAK,S","sources":["webpack://my_pra/./src/pages/User.tsx"],"sourcesContent":["import React from \"react\";\r\n\r\nconst User: React.FC = () => {\r\n  return <div>这是用户页面</div>;\r\n};\r\n\r\nexport default User;\r\n"],"names":["User","React"],"sourceRoot":""}

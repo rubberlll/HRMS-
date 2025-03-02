@@ -15,7 +15,7 @@ output: 出口文件
 module: 模块 - loader: 加载器，用于处理非 JavaScript 文件 包括 babel-loader css-loader
 plugins: 插件-html-webpack-plugin 最终构建好的静态资源都引入到 HTML 文件中，这样才能在浏览器中运行。
 devServer: （dev 环境）开发服务器 -HRM 热更新
-
+resolve: 设置模块怎么被解析 1.配置别名 2.配置扩展名
 3.package.json 的配置
 
 项目名称 版本号
@@ -83,3 +83,5 @@ utils 工具类 不可以包含业务逻辑 可复用 原子性
 提交表单 使用 axios 发送请求
 获取 token 后 存储到 zustand 中 并设置过期时间
 zustand 的 store 中 应该包含登录的逻辑 和 退出的逻辑 调用 utils 的 api 进行登录 退出
+
+注意 使用 less 的时候导入应该是 <div className="XXXX"> 千万别写错成括号了
