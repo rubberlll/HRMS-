@@ -1,7 +1,7 @@
 import React from "react";
-
+import WelcomeContext from "@/components/WelcomeContext";
 const Welcome: React.FC = () => {
-  return <div>欢迎来到我们的网站</div>;
+  return <WelcomeContext />;
 };
 
 export default Welcome;

@@ -1,7 +1,7 @@
 import React from "react";
-
+import UserTable from "../components/UserTable";
 const User: React.FC = () => {
-  return <div>这是用户页面</div>;
+  return <UserTable />;
 };
 
 export default User;
