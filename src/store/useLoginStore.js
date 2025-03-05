@@ -1,34 +1,50 @@
 import { create } from "zustand";
-import axios from "axios";
+import request from "../utils/request";
+
 export const useLoginStore = create((set) => ({
-  token: "",
-  /// token 是登录后返回的 token
+  token: localStorage.getItem("token") || "",
+  userInfo: JSON.parse(localStorage.getItem("userInfo") || "null"),
+
   setLogin: async (userData) => {
     try {
-      const res = await fetch("http://localhost:3001/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
-      });
+      const response = await request.post("/login", userData);
 
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(
-          errorData.message || `登录失败: HTTP error! status: ${res.status}`
+      if (response.code === 200) {
+        // 存储token和用户信息
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem(
+          "userInfo",
+          JSON.stringify(response.data.userInfo)
         );
-      }
 
-      const data = await res.json();
-      set({ token: data.token });
-      console.log(data);
+        set({
+          token: response.data.token,
+          userInfo: response.data.userInfo,
+        });
+
+        return response.data;
+      } else {
+        throw new Error(response.message || "登录失败");
+      }
     } catch (error) {
       console.error("登录失败:", error.message);
-      throw error; // 向上抛出错误，让调用者处理
+      throw error;
     }
   },
-  //登录
 
-  //退出登录
+  verifyToken: async () => {
+    try {
+      const response = await request.get("/verify-token");
+      return response.code === 200;
+    } catch (error) {
+      console.error("token验证失败:", error.message);
+      return false;
+    }
+  },
+
+  logout: () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("userInfo");
+    set({ token: "", userInfo: null });
+  },
 }));
