@@ -86,23 +86,104 @@ Mock.mock(/^\/api\/verify-token/, "get", (options) => {
 
 // 添加用户列表数据接口
 Mock.mock(/^\/api\/users/, "get", () => {
-  const users = Array.from({ length: 10 }, (_, index) => ({
-    key: (index + 1).toString(),
+  const users = Array.from({ length: 10 }, () => ({
+    key: Mock.Random.guid(),
     name: Mock.Random.cname(),
-    age: Mock.Random.integer(18, 60),
-    address: Mock.Random.city() + Mock.Random.county(),
-    tags: Mock.Random.shuffle([
-      "开发者",
-      "设计师",
+    position: Mock.Random.pick([
+      "前端工程师",
+      "后端工程师",
+      "UI设计师",
       "产品经理",
-      "测试员",
-      "运维",
-    ]).slice(0, Mock.Random.integer(1, 3)),
+      "测试工程师",
+    ]),
+    department: Mock.Random.pick([
+      "技术部",
+      "产品部",
+      "设计部",
+      "测试部",
+      "运维部",
+    ]),
+    email: Mock.Random.email(),
+    phone: Mock.mock(
+      /^1(3\d|4[5-9]|5[0-35-9]|6[2567]|7[0-8]|8\d|9[0-35-9])\d{8}$/
+    ),
+    status: Mock.Random.pick(["试用期", "正式", "离职"]),
+    entryDate: Mock.Random.date("yyyy-MM-dd"),
+    employmentInfo: {
+      salary: Mock.Random.integer(8000, 30000) + "元",
+      probationPeriod: "6个月",
+      contractPeriod: "3年",
+    },
+    education: {
+      school: Mock.Random.city() + "大学",
+      major: Mock.Random.pick([
+        "计算机科学",
+        "软件工程",
+        "信息技术",
+        "通信工程",
+      ]),
+      degree: Mock.Random.pick(["专科", "本科", "硕士", "博士"]),
+      graduationYear: Mock.Random.date("yyyy"),
+    },
   }));
 
   return {
     code: 200,
     message: "获取用户列表成功",
     data: users,
+  };
+});
+
+// 修改获取单个用户详情的接口匹配模式
+Mock.mock(/\/api\/users\/[\w-]+$/, "get", (options) => {
+  // 从URL中提取用户ID
+  const userId = options.url.split("/").pop();
+
+  // 生成一个固定的用户信息（也可以存储用户列表后根据ID查找）
+  const userDetail = {
+    key: userId,
+    name: Mock.Random.cname(),
+    position: Mock.Random.pick([
+      "前端工程师",
+      "后端工程师",
+      "UI设计师",
+      "产品经理",
+      "测试工程师",
+    ]),
+    department: Mock.Random.pick([
+      "技术部",
+      "产品部",
+      "设计部",
+      "测试部",
+      "运维部",
+    ]),
+    email: Mock.Random.email(),
+    phone: Mock.mock(
+      /^1(3\d|4[5-9]|5[0-35-9]|6[2567]|7[0-8]|8\d|9[0-35-9])\d{8}$/
+    ),
+    status: Mock.Random.pick(["试用期", "正式", "离职"]),
+    entryDate: Mock.Random.date("yyyy-MM-dd"),
+    employmentInfo: {
+      salary: Mock.Random.integer(8000, 30000) + "元",
+      probationPeriod: "6个月",
+      contractPeriod: "3年",
+    },
+    education: {
+      school: Mock.Random.city() + "大学",
+      major: Mock.Random.pick([
+        "计算机科学",
+        "软件工程",
+        "信息技术",
+        "通信工程",
+      ]),
+      degree: Mock.Random.pick(["专科", "本科", "硕士", "博士"]),
+      graduationYear: Mock.Random.date("yyyy"),
+    },
+  };
+
+  return {
+    code: 200,
+    message: "获取用户详情成功",
+    data: userDetail,
   };
 });

@@ -17,6 +17,8 @@ import {
 import type { TableProps } from "antd";
 import Mock from "mockjs";
 import axios from "axios";
+import dayjs from "dayjs";
+import { useNavigate } from "react-router-dom";
 
 interface EmployeeType {
   key: string;
@@ -55,6 +57,7 @@ const UserTable: React.FC = () => {
   const [selectedRecord, setSelectedRecord] = useState<EmployeeType | null>(
     null
   );
+  const navigate = useNavigate();
 
   const columns: TableProps<EmployeeType>["columns"] = [
     {
@@ -218,10 +221,21 @@ const UserTable: React.FC = () => {
       name: record.name,
       position: record.position,
       department: record.department,
-      entryDate: record.entryDate,
+      email: record.email,
+      phone: record.phone,
+      entryDate: dayjs(record.entryDate),
       status: record.status,
-      employmentInfo: record.employmentInfo,
-      education: record.education,
+      employmentInfo: {
+        salary: record.employmentInfo.salary,
+        probationPeriod: record.employmentInfo.probationPeriod,
+        contractPeriod: record.employmentInfo.contractPeriod,
+      },
+      education: {
+        school: record.education.school,
+        major: record.education.major,
+        degree: record.education.degree,
+        graduationYear: record.education.graduationYear,
+      },
     });
     setIsEditModalOpen(true);
   };
@@ -250,8 +264,8 @@ const UserTable: React.FC = () => {
   };
 
   const handleViewDetails = (record: EmployeeType) => {
-    // setSelectedRecord(record);
-    // setIsDetailsModalOpen(true);
+    setSelectedRecord(record);
+    setIsDetailsModalOpen(true);
   };
 
   const handleDetailsModalClose = () => {
@@ -448,15 +462,17 @@ const UserTable: React.FC = () => {
       </Modal>
 
       <Modal
-        title="员工详细信息"
+        title={
+          selectedRecord ? `${selectedRecord.name}的详细信息` : "员工详细信息"
+        }
         open={isDetailsModalOpen}
         onCancel={handleDetailsModalClose}
+        width={800}
         footer={[
           <Button key="close" onClick={handleDetailsModalClose}>
             关闭
           </Button>,
         ]}
-        width={700}
       >
         {selectedRecord && (
           <Descriptions bordered column={2}>
@@ -478,7 +494,13 @@ const UserTable: React.FC = () => {
             <Descriptions.Item label="薪资">
               {selectedRecord.employmentInfo.salary}
             </Descriptions.Item>
-            <Descriptions.Item label="教育背景">
+            <Descriptions.Item label="试用期">
+              {selectedRecord.employmentInfo.probationPeriod}
+            </Descriptions.Item>
+            <Descriptions.Item label="合同期限">
+              {selectedRecord.employmentInfo.contractPeriod}
+            </Descriptions.Item>
+            <Descriptions.Item label="学校">
               {selectedRecord.education.school}
             </Descriptions.Item>
             <Descriptions.Item label="专业">
