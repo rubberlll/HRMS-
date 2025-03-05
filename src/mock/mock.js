@@ -83,3 +83,26 @@ Mock.mock(/^\/api\/verify-token/, "get", (options) => {
     };
   }
 });
+
+// 添加用户列表数据接口
+Mock.mock(/^\/api\/users/, "get", () => {
+  const users = Array.from({ length: 10 }, (_, index) => ({
+    key: (index + 1).toString(),
+    name: Mock.Random.cname(),
+    age: Mock.Random.integer(18, 60),
+    address: Mock.Random.city() + Mock.Random.county(),
+    tags: Mock.Random.shuffle([
+      "开发者",
+      "设计师",
+      "产品经理",
+      "测试员",
+      "运维",
+    ]).slice(0, Mock.Random.integer(1, 3)),
+  }));
+
+  return {
+    code: 200,
+    message: "获取用户列表成功",
+    data: users,
+  };
+});

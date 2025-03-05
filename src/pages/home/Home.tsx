@@ -30,8 +30,13 @@ const Home: React.FC = () => {
   } = theme.useToken();
 
   return (
-    <Layout className="h-screen">
-      <Sider trigger={null} collapsible collapsed={collapsed}>
+    <Layout style={{ minHeight: "100vh" }}>
+      <Sider
+        trigger={null}
+        collapsible
+        collapsed={collapsed}
+        style={{ minHeight: "100vh" }}
+      >
         <div className="demo-logo-vertical" />
         <h2 style={{ textAlign: "center", marginTop: "10px", color: "white" }}>
           HRM系统
@@ -57,7 +62,18 @@ const Home: React.FC = () => {
               key: "3",
               icon: <UploadOutlined />,
               label: "招聘管理",
-              onClick: () => navigate("/recruitment"),
+              children: [
+                {
+                  key: "3-1",
+                  label: "简历查看",
+                  onClick: () => navigate("/recruitment/resume"),
+                },
+                {
+                  key: "3-2",
+                  label: "职位发布",
+                  onClick: () => navigate("/recruitment/positions"),
+                },
+              ],
             },
           ]}
         />
