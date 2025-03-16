@@ -56,8 +56,9 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     // 删除临时目录
     fs.rmdirSync(tempDir);
 
-    // 生成文件URL (在实际环境中，这应该是通过CDN或其他文件服务生成)
-    const fileUrl = `/uploads/files/${fileName}`;
+    // 生成文件URL (使用encodeURIComponent处理中文文件名)
+    const encodedFileName = encodeURIComponent(fileName);
+    const fileUrl = `/files/${encodedFileName}`;
 
     return res.status(200).json({
       code: 200,

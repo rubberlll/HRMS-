@@ -13,7 +13,6 @@ const Forbidden = lazy(() => import("../pages/Forbidden"));
 import PrivateRoute from "../components/PrivateRoute";
 const Resume = lazy(() => import("../pages/Resume"));
 const Job = lazy(() => import("../pages/Job"));
-const UserDetail = lazy(() => import("../pages/UserDetail"));
 const ApplyPage = lazy(() => import("../pages/recruitment/Apply"));
 const MyApplications = lazy(
   () => import("../pages/recruitment/MyApplications")
@@ -40,12 +39,6 @@ const router = createBrowserRouter([
       {
         path: "user",
         Component: User,
-        children: [
-          {
-            path: ":userId",
-            Component: UserDetail,
-          },
-        ],
       },
       {
         path: "/recruitment/resume",

@@ -1,75 +1,102 @@
-import React, { useState, useEffect } from "react";
-import {
-  Space,
-  Table,
-  Tag,
-  Input,
-  Button,
-  Modal,
-  Form,
-  message,
-  Descriptions,
-  Row,
-  Col,
-  DatePicker,
-  Select,
-} from "antd";
-import type { TableProps } from "antd";
-import Mock from "mockjs";
-import axios from "axios";
-import dayjs from "dayjs";
-import { useNavigate } from "react-router-dom";
-import request from "@/utils/request";
+import React, { useEffect, useState } from "react";
+import { Card, Spin, message, Table, Input, Button, Modal, Space } from "antd";
+import { SearchOutlined } from "@ant-design/icons";
+import request from "../utils/request";
+
 interface EmployeeType {
   key: string;
-  name: string;
-  position: string;
-  department: string;
+  username: string;
   email: string;
   phone: string;
-  status: "试用期" | "正式" | "离职";
+  role: string;
+  status: string;
+  department: string;
+  departmentId: string;
   entryDate: string;
-  employmentInfo: {
-    salary: string;
-    probationPeriod: string;
-    contractPeriod: string;
-  };
-  education: {
-    school: string;
-    major: string;
-    degree: string;
-    graduationYear: string;
-  };
+  employmentType: string;
+  avatar: string;
+  createdAt: string;
 }
 
-const UserTable: React.FC = () => {
+const UserDetail: React.FC = () => {
+  const [loading, setLoading] = useState(true);
+  const [employees, setEmployees] = useState<EmployeeType[]>([]);
   const [searchText, setSearchText] = useState("");
-  const [data, setData] = useState<EmployeeType[]>([]);
-  const [filteredData, setFilteredData] = useState<EmployeeType[]>([]);
-  const [pageSize, setPageSize] = useState(5);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<EmployeeType | null>(null);
-  const [form] = Form.useForm();
-  const [loading, setLoading] = useState(false);
-  const [modalLoading, setModalLoading] = useState(false);
-  const [isDetailsModalOpen, setIsDetailsModalOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<EmployeeType | null>(
-    null
-  );
-  const navigate = useNavigate();
 
-  const columns: TableProps<EmployeeType>["columns"] = [
+  // 获取所有用户数据
+  const fetchEmployees = async () => {
+    setLoading(true);
+    try {
+      const response = await request.get("/users");
+      console.log("API Response:", response.data);
+
+      if (response.data.code === 200) {
+        setEmployees(response.data.data);
+      } else {
+        message.error(
+          `获取员工信息失败：${response.data.message || "未知错误"}`
+        );
+      }
+    } catch (error) {
+      console.error("获取员工信息失败:", error);
+      message.error("获取员工信息失败");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  // 解雇员工
+  const handleFire = async (employeeId: string) => {
+    Modal.confirm({
+      title: "确认解雇",
+      content: "您确定要解雇该员工吗？",
+      okText: "确认",
+      cancelText: "取消",
+      onOk: async () => {
+        try {
+          const response = await request.put(`/users/${employeeId}`, {
+            status: "inactive",
+            role: "user",
+          });
+
+          if (response.data.code === 200) {
+            message.success("员工已解雇");
+            // 更新员工列表
+            fetchEmployees();
+          } else {
+            message.error(`解雇失败：${response.data.message || "未知错误"}`);
+          }
+        } catch (error) {
+          console.error("解雇员工失败:", error);
+          message.error("解雇员工失败");
+        }
+      },
+    });
+  };
+
+  // 表格列定义
+  const columns = [
     {
-      title: "姓名",
-      dataIndex: "name",
-      key: "name",
-      render: (text) => <a>{text}</a>,
+      title: "用户名",
+      dataIndex: "username",
+      key: "username",
+      filteredValue: [searchText],
+      onFilter: (value: string, record: EmployeeType) =>
+        record.username.toLowerCase().includes(value.toLowerCase()),
     },
     {
-      title: "职位",
-      dataIndex: "position",
-      key: "position",
+      title: "邮箱",
+      dataIndex: "email",
+      key: "email",
+    },
+    {
+      title: "电话",
+      dataIndex: "phone",
+      key: "phone",
     },
     {
       title: "部门",
@@ -80,483 +107,70 @@ const UserTable: React.FC = () => {
       title: "入职日期",
       dataIndex: "entryDate",
       key: "entryDate",
-      sorter: (a, b) =>
-        new Date(a.entryDate).getTime() - new Date(b.entryDate).getTime(),
     },
     {
       title: "状态",
       dataIndex: "status",
       key: "status",
-      render: (status: string) => {
-        const colorMap = {
-          试用期: "processing",
-          正式: "success",
-          离职: "default",
-        };
-        return (
-          <Tag color={colorMap[status as keyof typeof colorMap]}>{status}</Tag>
-        );
-      },
+    },
+    {
+      title: "雇佣类型",
+      dataIndex: "employmentType",
+      key: "employmentType",
     },
     {
       title: "操作",
       key: "action",
-      render: (_, record) => (
-        <Space size="middle">
-          <Button type="link" onClick={() => handleEdit(record)}>
-            编辑
-          </Button>
-          <Button type="link" onClick={() => handleViewDetails(record)}>
-            查看详情
-          </Button>
-        </Space>
+      render: (_, record: EmployeeType) => (
+        <Button
+          danger
+          onClick={() => handleFire(record.key)}
+          disabled={record.status === "fired"}
+        >
+          解雇
+        </Button>
       ),
     },
   ];
 
-  const handleSearch = (value: string) => {
-    setSearchText(value);
-    const filtered = data.filter((item) =>
-      Object.values(item).some((val) =>
-        val.toString().toLowerCase().includes(value.toLowerCase())
-      )
-    );
-    setFilteredData(filtered);
-  };
-
-  const handleShowSizeChange = (current: number, size: number) => {
-    setPageSize(size);
-  };
-
-  const handleAdd = () => {
-    setIsModalOpen(true);
-  };
-
-  const handleModalOk = async () => {
-    try {
-      setModalLoading(true);
-      await form.validateFields();
-      const values = form.getFieldsValue();
-
-      // 准备发送到后端的数据
-      const userData = {
-        name: values.name,
-        position: values.position,
-        department: values.department,
-        email: values.email || "",
-        phone: values.phone || "",
-        status: values.status,
-        entryDate: values.entryDate.format("YYYY-MM-DD"),
-        employmentInfo: {
-          salary: values.employmentInfo.salary,
-          probationPeriod: values.employmentInfo.probationPeriod,
-          contractPeriod: values.employmentInfo.contractPeriod,
-        },
-        education: {
-          school: values.education.school,
-          major: values.education.major,
-          degree: values.education.degree,
-          graduationYear: values.education.graduationYear,
-        },
-        // 添加必要的用户账号信息
-        username: values.email || `user_${Date.now()}`, // 使用邮箱或生成临时用户名
-        password: "123456", // 默认密码
-        role: "employee", // 默认角色
-      };
-
-      // 发送请求到后端API
-      const response = await request.post("/users", userData);
-
-      if (response.data.code === 200) {
-        // 添加成功后刷新数据
-        await fetchMockData();
-        setIsModalOpen(false);
-        form.resetFields();
-        message.success("添加用户成功！");
-      } else {
-        message.error(response.data.message || "添加用户失败，请重试！");
-      }
-    } catch (error) {
-      console.error("添加用户错误:", error);
-      message.error("添加用户失败，请重试！");
-    } finally {
-      setModalLoading(false);
-    }
-  };
-
-  const handleModalCancel = () => {
-    setIsModalOpen(false);
-    form.resetFields();
-  };
-
-  const handleEditModalOk = async () => {
-    try {
-      setModalLoading(true);
-      await form.validateFields();
-      const values = form.getFieldsValue();
-
-      // 准备更新数据
-      const userData = {
-        name: values.name,
-        position: values.position,
-        department: values.department,
-        email: values.email || "",
-        phone: values.phone || "",
-        status: values.status,
-        entryDate: values.entryDate.format("YYYY-MM-DD"),
-        employmentInfo: {
-          salary: values.employmentInfo.salary,
-          probationPeriod: values.employmentInfo.probationPeriod,
-          contractPeriod: values.employmentInfo.contractPeriod,
-        },
-        education: {
-          school: values.education.school,
-          major: values.education.major,
-          degree: values.education.degree,
-          graduationYear: values.education.graduationYear,
-        },
-      };
-
-      // 发送更新请求
-      const response = await axios.put(
-        `/api/users/${editingRecord!.key}`,
-        userData
-      );
-
-      if (response.data.code === 200) {
-        // 更新成功后刷新数据
-        await fetchMockData();
-        setIsEditModalOpen(false);
-        form.resetFields();
-        setEditingRecord(null);
-        message.success("更新用户成功！");
-      } else {
-        message.error(response.data.message || "更新用户失败，请重试！");
-      }
-    } catch (error) {
-      console.error("更新用户错误:", error);
-      message.error("更新用户失败，请重试！");
-    } finally {
-      setModalLoading(false);
-    }
-  };
-
-  const handleEditModalCancel = () => {
-    setIsEditModalOpen(false);
-    form.resetFields();
-    setEditingRecord(null);
-  };
-
-  const handleEdit = (record: EmployeeType) => {
-    setEditingRecord(record);
-    form.setFieldsValue({
-      name: record.name,
-      position: record.position,
-      department: record.department,
-      email: record.email,
-      phone: record.phone,
-      entryDate: dayjs(record.entryDate),
-      status: record.status,
-      employmentInfo: {
-        salary: record.employmentInfo.salary,
-        probationPeriod: record.employmentInfo.probationPeriod,
-        contractPeriod: record.employmentInfo.contractPeriod,
-      },
-      education: {
-        school: record.education.school,
-        major: record.education.major,
-        degree: record.education.degree,
-        graduationYear: record.education.graduationYear,
-      },
-    });
-    setIsEditModalOpen(true);
-  };
-
-  const handleDelete = (record: EmployeeType) => {
-    Modal.confirm({
-      title: "确认删除",
-      content: `确定要删除用户 ${record.name} 吗？`,
-      okText: "确认",
-      cancelText: "取消",
-      okButtonProps: { danger: true },
-      async onOk() {
-        try {
-          setLoading(true);
-
-          // 发送删除请求
-          const response = await axios.delete(`/api/users/${record.key}`);
-
-          if (response.data.code === 200) {
-            // 删除成功后刷新数据
-            await fetchMockData();
-            message.success("删除用户成功！");
-          } else {
-            message.error(response.data.message || "删除用户失败，请重试！");
-          }
-        } catch (error) {
-          console.error("删除用户错误:", error);
-          message.error("删除用户失败，请重试！");
-        } finally {
-          setLoading(false);
-        }
-      },
-    });
-  };
-
-  const handleViewDetails = (record: EmployeeType) => {
-    setSelectedRecord(record);
-    setIsDetailsModalOpen(true);
-  };
-
-  const handleDetailsModalClose = () => {
-    setIsDetailsModalOpen(false);
-    setSelectedRecord(null);
-  };
-
-  const fetchMockData = async () => {
-    setLoading(true);
-    try {
-      const response = await axios.get("/api/users");
-      if (response.data.code === 200) {
-        setData(response.data.data);
-        setFilteredData(response.data.data);
-      } else {
-        message.error("获取数据失败！");
-      }
-    } catch (error) {
-      message.error("获取数据失败！");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchMockData();
-  }, []);
-
-  const renderForm = () => (
-    <Form form={form} layout="vertical">
-      <Row gutter={16}>
-        <Col span={12}>
-          <Form.Item
-            name="name"
-            label="姓名"
-            rules={[{ required: true, message: "请输入姓名" }]}
-          >
-            <Input />
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item
-            name="position"
-            label="职位"
-            rules={[{ required: true, message: "请输入职位" }]}
-          >
-            <Input />
-          </Form.Item>
-        </Col>
-      </Row>
-
-      <Row gutter={16}>
-        <Col span={12}>
-          <Form.Item
-            name="department"
-            label="部门"
-            rules={[{ required: true, message: "请输入部门" }]}
-          >
-            <Input />
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item
-            name="entryDate"
-            label="入职日期"
-            rules={[{ required: true, message: "请选择入职日期" }]}
-          >
-            <DatePicker style={{ width: "100%" }} />
-          </Form.Item>
-        </Col>
-      </Row>
-
-      <Row gutter={16}>
-        <Col span={12}>
-          <Form.Item
-            name={["employmentInfo", "salary"]}
-            label="薪资"
-            rules={[{ required: true, message: "请输入薪资" }]}
-          >
-            <Input />
-          </Form.Item>
-        </Col>
-        <Col span={12}>
-          <Form.Item
-            name="status"
-            label="状态"
-            rules={[{ required: true, message: "请选择状态" }]}
-          >
-            <Select>
-              <Select.Option value="试用期">试用期</Select.Option>
-              <Select.Option value="正式">正式</Select.Option>
-              <Select.Option value="离职">离职</Select.Option>
-            </Select>
-          </Form.Item>
-        </Col>
-      </Row>
-
-      <Form.Item
-        name={["education", "school"]}
-        label="学校"
-        rules={[{ required: true, message: "请输入学校" }]}
-      >
-        <Input />
-      </Form.Item>
-
-      <Row gutter={16}>
-        <Col span={8}>
-          <Form.Item
-            name={["education", "major"]}
-            label="专业"
-            rules={[{ required: true, message: "请输入专业" }]}
-          >
-            <Input />
-          </Form.Item>
-        </Col>
-        <Col span={8}>
-          <Form.Item
-            name={["education", "degree"]}
-            label="学历"
-            rules={[{ required: true, message: "请选择学历" }]}
-          >
-            <Select>
-              <Select.Option value="专科">专科</Select.Option>
-              <Select.Option value="本科">本科</Select.Option>
-              <Select.Option value="硕士">硕士</Select.Option>
-              <Select.Option value="博士">博士</Select.Option>
-            </Select>
-          </Form.Item>
-        </Col>
-        <Col span={8}>
-          <Form.Item
-            name={["education", "graduationYear"]}
-            label="毕业年份"
-            rules={[{ required: true, message: "请输入毕业年份" }]}
-          >
-            <Input />
-          </Form.Item>
-        </Col>
-      </Row>
-    </Form>
+  // 筛选出role为employee的用户
+  const employeeOnly = employees.filter(
+    (employee) => employee.role === "employee"
   );
 
+  if (loading) {
+    return <Spin size="large" />;
+  }
+
+  if (!employees || employees.length === 0) {
+    return <div>未找到员工信息</div>;
+  }
+
+  if (employeeOnly.length === 0) {
+    return <div>未找到普通员工信息</div>;
+  }
+
   return (
-    <>
+    <div>
+      <h1>员工列表</h1>
       <Space style={{ marginBottom: 16 }}>
-        <Button type="primary" onClick={handleAdd}>
-          新增用户
-        </Button>
-        <Input.Search
-          placeholder="搜索..."
-          style={{ width: 300 }}
-          onSearch={handleSearch}
-          onChange={(e) => handleSearch(e.target.value)}
+        <Input
+          placeholder="搜索员工姓名"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value)}
+          prefix={<SearchOutlined />}
+          style={{ width: 200 }}
         />
+        <Button onClick={() => setSearchText("")}>清除搜索</Button>
       </Space>
-
-      <Table<EmployeeType>
-        loading={loading}
+      <Table
+        dataSource={employeeOnly}
         columns={columns}
-        dataSource={filteredData}
-        pagination={{
-          total: filteredData.length,
-          pageSize: pageSize,
-          pageSizeOptions: [5, 10, 20, 50, 100],
-          showTotal: (total) => `共 ${total} 条数据`,
-          showSizeChanger: true,
-          showQuickJumper: true,
-          onShowSizeChange: handleShowSizeChange,
-        }}
+        rowKey="key"
+        pagination={{ pageSize: 10 }}
       />
-
-      <Modal
-        title="新增用户"
-        open={isModalOpen}
-        onOk={handleModalOk}
-        onCancel={handleModalCancel}
-        confirmLoading={modalLoading}
-        okText="确认"
-        cancelText="取消"
-      >
-        {renderForm()}
-      </Modal>
-
-      <Modal
-        title="编辑用户"
-        open={isEditModalOpen}
-        onOk={handleEditModalOk}
-        onCancel={handleEditModalCancel}
-        confirmLoading={modalLoading}
-        okText="确认"
-        cancelText="取消"
-      >
-        {renderForm()}
-      </Modal>
-
-      <Modal
-        title={
-          selectedRecord ? `${selectedRecord.name}的详细信息` : "员工详细信息"
-        }
-        open={isDetailsModalOpen}
-        onCancel={handleDetailsModalClose}
-        width={800}
-        footer={[
-          <Button key="close" onClick={handleDetailsModalClose}>
-            关闭
-          </Button>,
-        ]}
-      >
-        {selectedRecord && (
-          <Descriptions bordered column={2}>
-            <Descriptions.Item label="姓名">
-              {selectedRecord.name}
-            </Descriptions.Item>
-            <Descriptions.Item label="职位">
-              {selectedRecord.position}
-            </Descriptions.Item>
-            <Descriptions.Item label="部门">
-              {selectedRecord.department}
-            </Descriptions.Item>
-            <Descriptions.Item label="入职日期">
-              {selectedRecord.entryDate}
-            </Descriptions.Item>
-            <Descriptions.Item label="状态">
-              {selectedRecord.status}
-            </Descriptions.Item>
-            <Descriptions.Item label="薪资">
-              {selectedRecord.employmentInfo.salary}
-            </Descriptions.Item>
-            <Descriptions.Item label="试用期">
-              {selectedRecord.employmentInfo.probationPeriod}
-            </Descriptions.Item>
-            <Descriptions.Item label="合同期限">
-              {selectedRecord.employmentInfo.contractPeriod}
-            </Descriptions.Item>
-            <Descriptions.Item label="学校">
-              {selectedRecord.education.school}
-            </Descriptions.Item>
-            <Descriptions.Item label="专业">
-              {selectedRecord.education.major}
-            </Descriptions.Item>
-            <Descriptions.Item label="学历">
-              {selectedRecord.education.degree}
-            </Descriptions.Item>
-            <Descriptions.Item label="毕业年份">
-              {selectedRecord.education.graduationYear}
-            </Descriptions.Item>
-          </Descriptions>
-        )}
-      </Modal>
-    </>
+    </div>
   );
 };
 
-export default UserTable;
+export default UserDetail;

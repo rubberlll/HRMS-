@@ -13,6 +13,15 @@ const nextConfig = {
   images: {
     domains: ["localhost:3000"],
   },
+  // 添加静态文件配置
+  async rewrites() {
+    return [
+      {
+        source: "/files/:path*",
+        destination: "/api/files/:path*",
+      },
+    ];
+  },
 };
 
 module.exports = nextConfig;
