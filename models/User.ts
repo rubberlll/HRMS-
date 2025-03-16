@@ -68,5 +68,9 @@ UserSchema.pre("save", async function (next) {
   }
 });
 
-export default mongoose.models.User ||
-  mongoose.model<IUser>("User", UserSchema);
+// 定义User模型实例类型
+const UserModel =
+  mongoose.models.User || mongoose.model<IUser>("User", UserSchema);
+
+// 导出类型化的模型
+export default UserModel as mongoose.Model<IUser>;

@@ -3,7 +3,8 @@ import type { FormProps } from "antd";
 import { Button, Checkbox, Form, Input, Card, message, Tabs } from "antd";
 import "./login.less";
 import { useNavigate } from "react-router-dom";
-import navigatingImage from "@/assets/images/Navigating.jpg";
+// 修改图片导入方式为 require 方式
+const navigatingImage = require("@/assets/images/Navigating.jpg");
 import { useLoginStore } from "@/store/useLoginStore";
 import request from "@/utils/request";
 import { CheckCircleOutlined } from "@ant-design/icons";

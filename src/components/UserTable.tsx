@@ -121,7 +121,7 @@ const UserDetail: React.FC = () => {
     {
       title: "操作",
       key: "action",
-      render: (_, record: EmployeeType) => (
+      render: (text: React.ReactNode, record: EmployeeType) => (
         <Button
           danger
           onClick={() => handleFire(record.key)}

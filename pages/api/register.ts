@@ -1,12 +1,13 @@
 import type { NextApiRequest, NextApiResponse } from "next";
-import User from "../../models/User";
+import User, { IUser } from "../../models/User";
 import dbConnect from "../../lib/mongodb";
 
 type ResponseData = {
-  success: boolean;
+  success?: boolean;
   message?: string;
   user?: any;
   code?: number;
+  data?: any;
 };
 
 export default async function handler(
@@ -33,7 +34,7 @@ export default async function handler(
     }
 
     // 检查用户名是否已存在
-    const existingUsername = await User.findOne({ username });
+    const existingUsername = (await User.findOne({ username })) as IUser | null;
     if (existingUsername) {
       return res.status(400).json({
         success: false,
@@ -42,7 +43,7 @@ export default async function handler(
     }
 
     // 检查邮箱是否已存在
-    const existingEmail = await User.findOne({ email });
+    const existingEmail = (await User.findOne({ email })) as IUser | null;
     if (existingEmail) {
       return res.status(400).json({
         success: false,

@@ -3,15 +3,15 @@ const path = require("path");
 
 const nextConfig = {
   reactStrictMode: true,
-  // 移除了webpack配置部分
-  // 只保留别名配置
-  resolve: {
-    alias: {
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
       "@": path.resolve(__dirname, "./src"),
-    },
+    };
+    return config;
   },
   images: {
-    domains: ["localhost:3000"],
+    domains: ["localhost"],
   },
   // 添加静态文件配置
   async rewrites() {

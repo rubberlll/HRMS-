@@ -20,8 +20,17 @@
     "incremental": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-    "isolatedModules": true
+    "isolatedModules": true,
+    "strictFunctionTypes": false
   },
-  "include": ["src/**/*", "src/typings.d.ts", "pages/api/register.ts"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "types/**/*.d.ts",
+    "src/**/*",
+    "src/typings.d.ts",
+    "pages/api/register.ts"
+  ],
   "exclude": ["node_modules"]
 }

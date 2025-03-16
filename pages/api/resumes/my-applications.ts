@@ -2,6 +2,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import connectDB from "../../../lib/mongodb";
 import Resume from "../../../models/Resume";
 import { authMiddleware } from "../../../middleware/auth";
+import { Model } from "mongoose";
+import { IResume } from "../../../models/Resume";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== "GET") {
@@ -15,9 +17,10 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const user = (req as any).user;
 
-    const resumes = await Resume.find({
-      userId: user.userId,
-    })
+    const resumes = await (Resume as Model<IResume>)
+      .find({
+        userId: user.userId,
+      })
       .populate("jobId", "title department")
       .sort({ submittedAt: -1 });
 

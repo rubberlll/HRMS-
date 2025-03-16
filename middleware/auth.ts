@@ -7,8 +7,18 @@ interface DecodedToken {
   role: string;
 }
 
-export function authMiddleware(handler: any) {
-  return async (req: NextApiRequest, res: NextApiResponse) => {
+// 扩展 NextApiRequest 类型，添加 user 属性
+export interface AuthenticatedRequest extends NextApiRequest {
+  user?: DecodedToken;
+}
+
+type ApiHandler = (
+  req: AuthenticatedRequest,
+  res: NextApiResponse
+) => Promise<void> | void;
+
+export function authMiddleware(handler: ApiHandler) {
+  return async (req: AuthenticatedRequest, res: NextApiResponse) => {
     try {
       const authHeader = req.headers.authorization;
 
@@ -21,14 +31,20 @@ export function authMiddleware(handler: any) {
       }
 
       const token = authHeader.split(" ")[1];
-      const secret = process.env.JWT_SECRET || "your-secret-key";
+      const secret = process.env.JWT_SECRET;
+
+      if (!secret) {
+        console.error("警告: JWT_SECRET 环境变量未设置");
+        return res.status(500).json({
+          code: 500,
+          message: "服务器配置错误",
+          data: null,
+        });
+      }
 
       try {
         const decoded = jwt.verify(token, secret) as DecodedToken;
-
-        // 将解码后的用户信息添加到请求对象中
-        (req as any).user = decoded;
-
+        req.user = decoded;
         return handler(req, res);
       } catch (error) {
         return res.status(401).json({
@@ -38,6 +54,7 @@ export function authMiddleware(handler: any) {
         });
       }
     } catch (error) {
+      console.error("认证中间件错误:", error);
       return res.status(500).json({
         code: 500,
         message: "服务器错误",
@@ -48,10 +65,10 @@ export function authMiddleware(handler: any) {
 }
 
 export function roleCheck(roles: string[]) {
-  return (handler: any) => {
-    return async (req: NextApiRequest, res: NextApiResponse) => {
+  return (handler: ApiHandler) => {
+    return async (req: AuthenticatedRequest, res: NextApiResponse) => {
       try {
-        const user = (req as any).user;
+        const user = req.user;
 
         if (!user) {
           return res.status(401).json({
@@ -71,6 +88,7 @@ export function roleCheck(roles: string[]) {
 
         return handler(req, res);
       } catch (error) {
+        console.error("角色检查中间件错误:", error);
         return res.status(500).json({
           code: 500,
           message: "服务器错误",

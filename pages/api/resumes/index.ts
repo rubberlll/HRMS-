@@ -2,6 +2,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import connectDB from "../../../lib/mongodb";
 import Resume from "../../../models/Resume";
 import { authMiddleware } from "../../../middleware/auth";
+import { Model } from "mongoose";
+import { IResume } from "../../../models/Resume"; // 假设您有这个接口
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -17,7 +19,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         query = { userId: user.userId };
       }
 
-      const resumes = await Resume.find(query)
+      const resumes = await (Resume as Model<IResume>)
+        .find(query)
         .populate("userId", "username email")
         .populate("jobId", "title department")
         .sort({ submittedAt: -1 });
@@ -42,7 +45,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
-      const resume = await Resume.create({
+      const resume = await (Resume as Model<IResume>).create({
         userId: user.userId,
         fileUrl,
         fileName,

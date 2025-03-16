@@ -11,7 +11,7 @@ export const config = {
 };
 
 interface FormidableFile {
-  filepath?: string;
+  filepath: string;
   path?: string;
   size: number;
   name: string;
@@ -19,7 +19,10 @@ interface FormidableFile {
   // 其他可能的属性
 }
 
-async function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+): Promise<void> {
   if (req.method !== "POST") {
     return res
       .status(405)
@@ -41,12 +44,12 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
       maxFileSize: 20 * 1024 * 1024, // 设置最大文件大小为20MB
     });
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       form.parse(req, async (err, fields, files) => {
         if (err) {
           console.error("解析表单错误:", err);
           res.status(500).json({ code: 500, message: "上传失败", data: null });
-          return resolve(true);
+          return resolve();
         }
 
         try {
@@ -73,7 +76,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             res
               .status(400)
               .json({ code: 400, message: "参数不完整", data: null });
-            return resolve(true);
+            return resolve();
           }
 
           // 创建以文件名命名的临时文件夹存储分片
@@ -82,15 +85,16 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             fs.mkdirSync(fileDir, { recursive: true });
           }
 
-          // 获取正确的文件路径 - 使用类型断言解决TypeScript错误
-          const filePath = chunk.filepath || chunk.path;
+          // 获取正确的文件路径 - 改进类型处理
+          const filePath =
+            (chunk as FormidableFile).filepath || (chunk as any).path;
 
           if (!filePath) {
             console.error("无法获取文件路径:", chunk);
             res
               .status(500)
               .json({ code: 500, message: "无法获取文件路径", data: null });
-            return resolve(true);
+            return resolve();
           }
 
           // 保存分片到对应的文件夹
@@ -102,13 +106,13 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
             message: "分片上传成功",
             data: { chunkIndex, totalChunks: chunks },
           });
-          return resolve(true);
+          return resolve();
         } catch (error) {
           console.error("处理分片错误:", error);
           res
             .status(500)
             .json({ code: 500, message: "处理分片失败", data: null });
-          return resolve(true);
+          return resolve();
         }
       });
     });

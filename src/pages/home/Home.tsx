@@ -44,7 +44,13 @@ const DraggableMenuItem = ({
     },
   });
 
-  return <div ref={(node) => drag(drop(node))}>{item}</div>;
+  // 修复ref的用法
+  const ref = (node: HTMLDivElement) => {
+    drag(node);
+    drop(node);
+  };
+
+  return <div ref={ref}>{item}</div>;
 };
 
 const Home: React.FC = () => {

@@ -2,6 +2,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import connectDB from "../../../lib/mongodb";
 import Job from "../../../models/Job";
 import { authMiddleware, roleCheck } from "../../../middleware/auth";
+import { Model } from "mongoose";
+import { IJob } from "../../../models/Job";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
@@ -10,7 +12,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     await connectDB();
 
     if (req.method === "GET") {
-      const job = await Job.findById(id)
+      const job = await (Job as Model<IJob>)
+        .findById(id)
         .populate("department", "name")
         .populate("createdBy", "username");
 
@@ -49,7 +52,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
-      const updatedJob = await Job.findByIdAndUpdate(
+      const updatedJob = await (Job as Model<IJob>).findByIdAndUpdate(
         id,
         {
           title,
@@ -80,7 +83,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     if (req.method === "DELETE") {
-      const deletedJob = await Job.findByIdAndDelete(id);
+      const deletedJob = await (Job as Model<IJob>).findByIdAndDelete(id);
 
       if (!deletedJob) {
         return res.status(404).json({

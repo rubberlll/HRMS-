@@ -4,7 +4,7 @@ import { lazy } from "react";
 
 const Login = lazy(() => import("../pages/login/Login"));
 const Home = lazy(() => import("../pages/home/Home"));
-const Recruitment = lazy(() => import("../pages/Recruitment"));
+const Recruitment = lazy(() => import("../pages/recruitment/Apply"));
 const Welcome = lazy(() => import("../pages/Welcome"));
 const User = lazy(() => import("../pages/User"));
 const NotFound = lazy(() => import("../pages/NotFound"));

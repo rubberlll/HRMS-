@@ -1,27 +1,20 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import Department, { IDepartment } from "../../../models/Department";
 import dbConnect from "../../../lib/mongodb";
-import { authMiddleware } from "../../../middleware/auth";
+import { authMiddleware, AuthenticatedRequest } from "../../../middleware/auth";
+import { Model } from "mongoose";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+// 不直接暴露handler函数，而是通过中间件包装它
+const handler = async (req: AuthenticatedRequest, res: NextApiResponse) => {
   const { method } = req;
-
-  // 验证token
-  try {
-    await authMiddleware(req);
-  } catch (error) {
-    return res.status(401).json({ code: 401, message: "未授权", data: null });
-  }
 
   await dbConnect();
 
   switch (method) {
     case "GET":
       try {
-        const departments = await Department.find({})
+        const departments = await (Department as Model<IDepartment>)
+          .find({})
           .populate("manager", "name email")
           .populate("parentDepartment", "name");
 
@@ -40,7 +33,9 @@ export default async function handler(
 
     case "POST":
       try {
-        const department = await Department.create(req.body);
+        const department = await (Department as Model<IDepartment>).create(
+          req.body
+        );
         return res.status(201).json({
           code: 201,
           message: "创建部门成功",
@@ -69,4 +64,7 @@ export default async function handler(
         data: null,
       });
   }
-}
+};
+
+// 使用中间件包装处理函数
+export default authMiddleware(handler);

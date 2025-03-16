@@ -19,6 +19,7 @@
     "@babel/core": "^7.23.9",
     "@babel/preset-react": "^7.23.3",
     "@babel/preset-typescript": "^7.23.3",
+    "@types/jsonwebtoken": "^9.0.9",
     "@types/mime-types": "^2.1.4",
     "@types/mockjs": "^1.0.10",
     "babel-loader": "^9.1.3",

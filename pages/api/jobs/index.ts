@@ -2,13 +2,16 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import connectDB from "../../../lib/mongodb";
 import Job from "../../../models/Job";
 import { authMiddleware, roleCheck } from "../../../middleware/auth";
+import { Model } from "mongoose";
+import { IJob } from "../../../models/Job";
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     await connectDB();
 
     if (req.method === "GET") {
-      const jobs = await Job.find()
+      const jobs = await (Job as Model<IJob>)
+        .find()
         .populate("department", "name")
         .populate("createdBy", "username")
         .sort({ createdAt: -1 });
@@ -41,7 +44,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
 
       const user = (req as any).user;
 
-      const job = await Job.create({
+      const job = await (Job as Model<IJob>).create({
         title,
         department,
         description,

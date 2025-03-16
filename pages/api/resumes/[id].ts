@@ -2,6 +2,8 @@ import type { NextApiRequest, NextApiResponse } from "next";
 import connectDB from "../../../lib/mongodb";
 import Resume from "../../../models/Resume";
 import { authMiddleware, roleCheck } from "../../../middleware/auth";
+import { Model } from "mongoose";
+import { IResume } from "../../../models/Resume"; // 假设这个接口存在，如果不存在需要创建
 
 async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { id } = req.query;
@@ -11,7 +13,8 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     await connectDB();
 
     if (req.method === "GET") {
-      const resume = await Resume.findById(id)
+      const resume = await (Resume as Model<IResume>)
+        .findById(id)
         .populate("userId", "username email")
         .populate("jobId", "title department");
 
@@ -63,7 +66,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
-      const updatedResume = await Resume.findByIdAndUpdate(
+      const updatedResume = await (Resume as Model<IResume>).findByIdAndUpdate(
         id,
         { status },
         { new: true }
@@ -85,7 +88,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     if (req.method === "DELETE") {
-      const resume = await Resume.findById(id);
+      const resume = await (Resume as Model<IResume>).findById(id);
 
       if (!resume) {
         return res.status(404).json({
@@ -104,7 +107,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse) {
         });
       }
 
-      await Resume.findByIdAndDelete(id);
+      await (Resume as Model<IResume>).findByIdAndDelete(id);
 
       return res.status(200).json({
         code: 200,
