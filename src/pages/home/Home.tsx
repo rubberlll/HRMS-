@@ -8,6 +8,7 @@ import {
   UploadOutlined,
   UserOutlined,
   VideoCameraOutlined,
+  TeamOutlined,
 } from "@ant-design/icons";
 import { Button, Layout, Menu, theme, Breadcrumb, Tag } from "antd";
 import UserDropdown from "../../components/UserDropdown";
@@ -97,11 +98,45 @@ const Home: React.FC = () => {
           key: "3-2",
           label: "职位发布",
           onClick: () => {
-            navigate("/recruitment/positions");
-            addVisitedTag("/recruitment/positions", "职位发布");
+            navigate("/recruitment/jobs");
+            addVisitedTag("/recruitment/jobs", "职位发布");
+          },
+        },
+        {
+          key: "3-3",
+          label: "申请职位",
+          onClick: () => {
+            navigate("/recruitment/apply");
+            addVisitedTag("/recruitment/apply", "申请职位");
+          },
+        },
+        {
+          key: "3-4",
+          label: "我的申请",
+          onClick: () => {
+            navigate("/recruitment/my-applications");
+            addVisitedTag("/recruitment/my-applications", "我的申请");
           },
         },
       ],
+    },
+    {
+      key: "4",
+      icon: <UserOutlined />,
+      label: "权限管理",
+      onClick: () => {
+        navigate("/permission-management");
+        addVisitedTag("/permission-management", "权限管理");
+      },
+    },
+    {
+      key: "5",
+      icon: <TeamOutlined />,
+      label: "部门管理",
+      onClick: () => {
+        navigate("/department");
+        addVisitedTag("/department", "部门管理");
+      },
     },
   ]);
 
@@ -135,7 +170,11 @@ const Home: React.FC = () => {
     "/user": "员工管理",
     "/recruitment": "招聘管理",
     "/recruitment/resume": "简历查看",
-    "/recruitment/positions": "职位发布",
+    "/recruitment/jobs": "职位发布",
+    "/recruitment/apply": "申请职位",
+    "/recruitment/my-applications": "我的申请",
+    "/permission-management": "权限管理",
+    "/department": "部门管理",
   };
 
   return (

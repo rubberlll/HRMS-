@@ -13,5 +13,12 @@ module.exports = merge(baseConfig, {
     static: {
       directory: path.join(__dirname, "public"),
     },
+    proxy: [
+      {
+        context: ["/api"],
+        target: "http://localhost:3001",
+        changeOrigin: true,
+      },
+    ],
   },
 });

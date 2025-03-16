@@ -8,11 +8,21 @@ const Home = lazy(() => import("../pages/home/Home"));
 const Welcome = lazy(() => import("../pages/Welcome"));
 const User = lazy(() => import("../pages/User"));
 const NotFound = lazy(() => import("../pages/NotFound"));
+const Forbidden = lazy(() => import("../pages/Forbidden"));
 
 import PrivateRoute from "../components/PrivateRoute";
 const Resume = lazy(() => import("../pages/Resume"));
-const Position = lazy(() => import("../pages/Position"));
+const Job = lazy(() => import("../pages/Job"));
 const UserDetail = lazy(() => import("../pages/UserDetail"));
+const ApplyPage = lazy(() => import("../pages/recruitment/Apply"));
+const MyApplications = lazy(
+  () => import("../pages/recruitment/MyApplications")
+);
+const PermissionManagement = lazy(
+  () => import("../pages/PermissionManagement")
+);
+const Department = lazy(() => import("../pages/department"));
+
 const router = createBrowserRouter([
   {
     path: "/login",
@@ -42,12 +52,31 @@ const router = createBrowserRouter([
         Component: Resume,
       },
       {
-        path: "/recruitment/positions",
-        Component: Position,
+        path: "/recruitment/jobs",
+        Component: Job,
+      },
+      {
+        path: "/recruitment/apply",
+        element: <ApplyPage />,
+      },
+      {
+        path: "/recruitment/my-applications",
+        element: <MyApplications />,
+      },
+      {
+        path: "/permission-management",
+        element: <PermissionManagement />,
+      },
+      {
+        path: "/department",
+        element: <Department />,
       },
     ],
   },
-
+  {
+    path: "/403",
+    Component: Forbidden,
+  },
   {
     path: "/notfound",
     Component: NotFound,

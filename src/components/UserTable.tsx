@@ -19,7 +19,7 @@ import Mock from "mockjs";
 import axios from "axios";
 import dayjs from "dayjs";
 import { useNavigate } from "react-router-dom";
-
+import request from "@/utils/request";
 interface EmployeeType {
   key: string;
   name: string;
@@ -137,10 +137,15 @@ const UserTable: React.FC = () => {
       setModalLoading(true);
       await form.validateFields();
       const values = form.getFieldsValue();
-      const newUser = {
-        key: (data.length + 1).toString(),
-        ...values,
-        status: values.status as "试用期" | "正式" | "离职",
+
+      // 准备发送到后端的数据
+      const userData = {
+        name: values.name,
+        position: values.position,
+        department: values.department,
+        email: values.email || "",
+        phone: values.phone || "",
+        status: values.status,
         entryDate: values.entryDate.format("YYYY-MM-DD"),
         employmentInfo: {
           salary: values.employmentInfo.salary,
@@ -153,13 +158,26 @@ const UserTable: React.FC = () => {
           degree: values.education.degree,
           graduationYear: values.education.graduationYear,
         },
+        // 添加必要的用户账号信息
+        username: values.email || `user_${Date.now()}`, // 使用邮箱或生成临时用户名
+        password: "123456", // 默认密码
+        role: "employee", // 默认角色
       };
-      setData([...data, newUser]);
-      setFilteredData([...data, newUser]);
-      setIsModalOpen(false);
-      form.resetFields();
-      message.success("添加用户成功！");
+
+      // 发送请求到后端API
+      const response = await request.post("/users", userData);
+
+      if (response.data.code === 200) {
+        // 添加成功后刷新数据
+        await fetchMockData();
+        setIsModalOpen(false);
+        form.resetFields();
+        message.success("添加用户成功！");
+      } else {
+        message.error(response.data.message || "添加用户失败，请重试！");
+      }
     } catch (error) {
+      console.error("添加用户错误:", error);
       message.error("添加用户失败，请重试！");
     } finally {
       setModalLoading(false);
@@ -176,10 +194,15 @@ const UserTable: React.FC = () => {
       setModalLoading(true);
       await form.validateFields();
       const values = form.getFieldsValue();
-      const updatedUser = {
-        key: editingRecord!.key,
-        ...values,
-        status: values.status as "试用期" | "正式" | "离职",
+
+      // 准备更新数据
+      const userData = {
+        name: values.name,
+        position: values.position,
+        department: values.department,
+        email: values.email || "",
+        phone: values.phone || "",
+        status: values.status,
         entryDate: values.entryDate.format("YYYY-MM-DD"),
         employmentInfo: {
           salary: values.employmentInfo.salary,
@@ -193,16 +216,25 @@ const UserTable: React.FC = () => {
           graduationYear: values.education.graduationYear,
         },
       };
-      const newData = data.map((item) =>
-        item.key === editingRecord!.key ? updatedUser : item
+
+      // 发送更新请求
+      const response = await axios.put(
+        `/api/users/${editingRecord!.key}`,
+        userData
       );
-      setData(newData);
-      setFilteredData(newData);
-      setIsEditModalOpen(false);
-      form.resetFields();
-      setEditingRecord(null);
-      message.success("更新用户成功！");
+
+      if (response.data.code === 200) {
+        // 更新成功后刷新数据
+        await fetchMockData();
+        setIsEditModalOpen(false);
+        form.resetFields();
+        setEditingRecord(null);
+        message.success("更新用户成功！");
+      } else {
+        message.error(response.data.message || "更新用户失败，请重试！");
+      }
     } catch (error) {
+      console.error("更新用户错误:", error);
       message.error("更新用户失败，请重试！");
     } finally {
       setModalLoading(false);
@@ -250,11 +282,19 @@ const UserTable: React.FC = () => {
       async onOk() {
         try {
           setLoading(true);
-          const newData = data.filter((item) => item.key !== record.key);
-          setData(newData);
-          setFilteredData(newData);
-          message.success("删除用户成功！");
+
+          // 发送删除请求
+          const response = await axios.delete(`/api/users/${record.key}`);
+
+          if (response.data.code === 200) {
+            // 删除成功后刷新数据
+            await fetchMockData();
+            message.success("删除用户成功！");
+          } else {
+            message.error(response.data.message || "删除用户失败，请重试！");
+          }
         } catch (error) {
+          console.error("删除用户错误:", error);
           message.error("删除用户失败，请重试！");
         } finally {
           setLoading(false);

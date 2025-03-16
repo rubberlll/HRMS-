@@ -4,11 +4,10 @@
 
 ---
 
-使⽤ react-flowbite 组件库进⾏界⾯美化。
 React 项⽬⼯作拼接库
 使⽤ Redux 以及 useState、useSelector 等 react hook 完成状态管理
 使⽤ JWT+cookie 实现⽤户验证和登录
-使⽤ react-flowbite 组件库进⾏界⾯美化。对常⽤的组件进⾏封装提升可读性
+对常⽤的组件进⾏封装提升可读性
 项⽬中的所有组件均使⽤ React 的函数组件，使⽤了⼀系列的 React Hook，例如 useState
 ,useEffect,useMemo ,useCallback.
 项⽬对 Axios 进⾏了简易的封装，使⽤了 styled-components 库来编写 CSS.

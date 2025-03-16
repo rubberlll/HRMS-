@@ -12,9 +12,7 @@ const contentStyle: React.CSSProperties = {
 };
 
 const WelcomeContext: React.FC = () => {
-  const onChange = (currentSlide: number) => {
-    console.log(currentSlide);
-  };
+  const onChange = (currentSlide: number) => {};
   const fontStyle: React.CSSProperties = {
     fontSize: "20px",
     fontWeight: "bold",

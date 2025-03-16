@@ -1,26 +1,40 @@
 import React, { useEffect } from "react";
-import { Navigate, useNavigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 import { useLoginStore } from "@/store/useLoginStore";
+import { hasPermission } from "@/config/permissions";
 
 interface PrivateRouteProps {
-  children: React.ReactNode;
+  children: React.ReactElement;
 }
 
 const PrivateRoute: React.FC<PrivateRouteProps> = ({ children }) => {
-  const { token } = useLoginStore();
-  const navigate = useNavigate();
+  const { isLogin, userInfo, verifyToken } = useLoginStore();
+  const location = useLocation();
 
+  // 组件挂载时验证token有效性
   useEffect(() => {
-    if (!token) {
-      navigate("/login");
+    if (isLogin) {
+      verifyToken();
     }
-  }, [token, navigate]);
+  }, [isLogin, verifyToken]);
 
-  if (!token) {
-    return <Navigate to="/login" replace />;
+  if (!isLogin) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  return <>{children}</>;
+  // 确保userInfo存在
+  if (!userInfo) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  // 检查用户是否有权限访问当前路由
+  const hasRoutePermission = hasPermission(userInfo.role, location.pathname);
+
+  if (!hasRoutePermission) {
+    return <Navigate to="/403" replace />;
+  }
+
+  return children;
 };
 
 export default PrivateRoute;

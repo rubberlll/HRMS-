@@ -1,10 +1,23 @@
+import { Suspense } from "react";
+import { RouterProvider } from "react-router-dom";
+import router from "./router";
+import { ConfigProvider, theme } from "antd";
+import { useThemeStore } from "./store/useThemeStore";
 import React from "react";
-import "./app.css";
-export default function App() {
+function App() {
+  const { isDarkMode } = useThemeStore();
+
   return (
-    <div>
-      <h2>webpack-react-ts</h2>
-      <button onClick={() => alert("Hello World")}>Click me</button>
-    </div>
+    <ConfigProvider
+      theme={{
+        algorithm: isDarkMode ? theme.darkAlgorithm : theme.defaultAlgorithm,
+      }}
+    >
+      <Suspense fallback={<div>加载中...</div>}>
+        <RouterProvider router={router} />
+      </Suspense>
+    </ConfigProvider>
   );
 }
+
+export default App;
