@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkmy_pra=self.webpackChunkmy_pra||[]).push([[328],{6328:(e,a,l)=>{l.r(a),l.d(a,{default:()=>s});var r=l(6540);const s=()=>r.createElement("div",null,"这是用户页面")}}]);
-//# sourceMappingURL=328.bundle.js.map

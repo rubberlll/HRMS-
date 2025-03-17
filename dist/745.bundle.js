@@ -1,2 +1,0 @@
-"use strict";(self.webpackChunkmy_pra=self.webpackChunkmy_pra||[]).push([[745],{4745:(e,a,l)=>{l.r(a),l.d(a,{default:()=>s});var r=l(6540);const s=()=>r.createElement("div",null,"欢迎来到我们的网站")}}]);
-//# sourceMappingURL=745.bundle.js.map

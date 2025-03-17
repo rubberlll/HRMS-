@@ -1,1 +1,0 @@
-{"version":3,"file":"745.bundle.js","mappings":"2IAEA,MAIA,EAJ0BA,IACjBC,EAAAA,cAAA,WAAK,Y","sources":["webpack://my_pra/./src/pages/Welcome.tsx"],"sourcesContent":["import React from \"react\";\r\n\r\nconst Welcome: React.FC = () => {\r\n  return <div>欢迎来到我们的网站</div>;\r\n};\r\n\r\nexport default Welcome;\r\n"],"names":["Welcome","React"],"sourceRoot":""}

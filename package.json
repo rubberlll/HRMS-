@@ -4,9 +4,9 @@
   "main": "src/index.tsx",
   "scripts": {
     "dev": "webpack serve --config build/webpack.dev.js",
-    "dev:next": "next dev",
-    "start": "webpack serve --mode production --open",
-    "start:next": "next start",
+    "dev:next": "next dev --port 3001",
+    "start": "webpack serve --config build/webpack.prod.js",
+    "start:next": "next start --port 3001",
     "build": "webpack --config build/webpack.prod.js",
     "build:next": "next build",
     "test": "echo \"Error: no test specified\" && exit 1"
